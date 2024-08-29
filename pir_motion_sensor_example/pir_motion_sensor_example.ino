@@ -1,49 +1,32 @@
-
-#define timeSeconds 10
-
-// Set GPIOs for LED and PIR Motion Sensor
-const int led = 26;
-const int motionSensor = 27;
-
-// Timer: Auxiliary variables
-unsigned long now = millis();
-unsigned long lastTrigger = 0;
-boolean startTimer = false;
-boolean motion = false;
-
-// Checks if motion was detected, sets LED HIGH and starts a timer
-void IRAM_ATTR detectsMovement() {
-  digitalWrite(led, HIGH);
-  startTimer = true;
-  lastTrigger = millis();
-}
+const int PIR_SENSOR_OUTPUT_PIN = 27;  /* PIR sensor O/P pin */
+int warm_up;
 
 void setup() {
-  // Serial port for debugging purposes
-  Serial.begin(115200);
-  
-  // PIR Motion Sensor mode INPUT_PULLUP
-  pinMode(motionSensor, INPUT_PULLUP);
-  // Set motionSensor pin as interrupt, assign interrupt function and set RISING mode
-  attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
-
-  // Set LED to LOW
-  pinMode(led, OUTPUT);
-  digitalWrite(led, LOW);
+  pinMode(PIR_SENSOR_OUTPUT_PIN, INPUT);
+  Serial.begin(115200); /* Define baud rate for serial communication */
+  Serial.println("Waiting For Power On Warm Up");
+  delay(20000); /* Power On Warm Up Delay */
+  Serial.println("Ready!");
 }
 
 void loop() {
-  // Current time
-  now = millis();
-  if((digitalRead(led) == HIGH) && (motion == false)) {
-    Serial.println("MOTION DETECTED!!!");
-    motion = true;
+  int sensor_output;
+  sensor_output = digitalRead(PIR_SENSOR_OUTPUT_PIN);
+  if( sensor_output == LOW )
+  {
+    if( warm_up == 1 )
+     {
+      Serial.print("Warming Up\n\n");
+      warm_up = 0;
+      delay(2000);
+    }
+    Serial.print("No object in sight\n\n");
+    delay(1000);
   }
-  // Turn off the LED after the number of seconds defined in the timeSeconds variable
-  if(startTimer && (now - lastTrigger > (timeSeconds*500))) {
-    Serial.println("Motion stopped...");
-    digitalWrite(led, LOW);
-    startTimer = false;
-    motion = false;
-  }
+  else
+  {
+    Serial.print("Object detected\n\n");   
+    warm_up = 1;
+    delay(1000);
+  } 
 }
