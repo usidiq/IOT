@@ -19,7 +19,7 @@ To get started with the projects in this repository:
 
 Clone the repository:  
 
-`git clone https://github.com/yourusername/your-repository.git`
+`git clone https://github.com/augursarkum/IoT.git`
 
 Follow the instructions in each project’s README to set up and deploy.
 #Contributions
